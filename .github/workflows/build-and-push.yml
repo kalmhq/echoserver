@@ -16,5 +16,5 @@ jobs:
       uses: docker/build-push-action@v1.1.0
       with:
         repository: kalmhq/echoserver
-        username: ${{ secret.ECHOSERVER_DOCKERHUB_USERNAME }}
-        password: ${{ secret.ECHOSERVER_DOCKERHUB_PASSWORD }}
+        username: ${{ secrets.ECHOSERVER_DOCKERHUB_USERNAME }}
+        password: ${{ secrets.ECHOSERVER_DOCKERHUB_PASSWORD }}
