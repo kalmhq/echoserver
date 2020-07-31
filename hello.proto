@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package main;
+
+message GreetingMessage {}
+
+message GreetingReply {
+    string hostname = 1;
+    string client_address = 2;
+    string auth_info = 3;
+}
+
+service HelloWorld {
+    rpc Greeting (GreetingMessage) returns (GreetingReply) {};
+}
