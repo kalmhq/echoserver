@@ -1,4 +1,4 @@
-module github.com/kalmhq/network-protocol-box
+module github.com/kalmhq/echoserver
 
 go 1.13
 
