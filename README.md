@@ -11,6 +11,21 @@ This is a test project. Run different protocols on multiple ports to test the pr
 | 8004 | Non-TLS Grpc server.                                                               |
 | 8005 | TLS-Enabled Grpc server.                                                           |
 
+# Run
+
+### localhost
+pull this repo and run
+
+```bash
+go run .
+```
+
+### docker
+
+```bash
+docker run --rm -p 8001-8005:8001-8005 kalmhq/echoserver:latest
+```
+
 # Test 
 Before run tests. Upgrade your `curl` to the lastest version.
 
