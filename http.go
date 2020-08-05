@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -39,6 +42,23 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	for name, headers := range req.Header {
 		for _, h := range headers {
 			_, _ = fmt.Fprintf(w, "    %v: %v\n", name, h)
+		}
+	}
+
+	if req.Header.Get("Kalm-Sso-Userinfo") != "" {
+		_, _ = fmt.Fprintf(w, "\nKalm SSO:\n")
+		claims, err := base64.RawStdEncoding.DecodeString(req.Header.Get("Kalm-Sso-Userinfo"))
+
+		if err != nil {
+			_, _ = fmt.Fprintf(w, "Base64 decode error: %s\n", err.Error())
+		} else {
+			var out bytes.Buffer
+			prefix := "  "
+			if err := json.Indent(&out, claims, prefix, "  "); err != nil {
+				_, _ = fmt.Fprintf(w, "json indent error: %s\n", err.Error())
+			} else {
+				_, _ = fmt.Fprintf(w, "%s%s\n", prefix, string(out.Bytes()))
+			}
 		}
 	}
 
