@@ -11,6 +11,7 @@ This is a test project. Run different protocols on multiple ports to test the pr
 | 8004 | Non-TLS Grpc server.                                                               |
 | 8005 | TLS-Enabled Grpc server.                                                           |
 | 8006 | Non-TLS TCP server.                                                           |
+| 8007 | UDP server.                                                           |
 
 # Run
 
@@ -24,7 +25,7 @@ go run .
 ### docker
 
 ```bash
-docker run --rm -p 8001-8005:8001-8005 kalmhq/echoserver:latest
+docker run --rm -p 8001-8010:8001-8010 kalmhq/echoserver:latest
 ```
 
 # Test 
