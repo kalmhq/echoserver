@@ -10,6 +10,7 @@ This is a test project. Run different protocols on multiple ports to test the pr
 | 8003 | TLS-Enabled http2 server.                                                          |
 | 8004 | Non-TLS Grpc server.                                                               |
 | 8005 | TLS-Enabled Grpc server.                                                           |
+| 8006 | Non-TLS TCP server.                                                           |
 
 # Run
 
@@ -94,4 +95,12 @@ Please make sure you have [grpcurl](https://github.com/fullstorydev/grpcurl) ins
 
 ```bash
 grpcurl -insecure localhost:8005 main.HelloWorld/Greeting
+```
+### Test 8006
+
+```bash
+telnet localhost 8006
+
+# type something and press enter
+# Use ctrl + ] and ctrl + D to exit
 ```
