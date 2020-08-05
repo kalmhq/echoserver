@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -176,5 +177,50 @@ func StartGrpcWithTLSServer(port int) {
 
 	if err := s.Serve(lis); err != nil {
 		panic(err)
+	}
+}
+
+func StartTCPServer(port int) {
+	addr := ":" + strconv.Itoa(port)
+	l, err := net.Listen("tcp", addr)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer l.Close()
+
+	fmt.Printf("listening on %s, tcp\n", addr)
+
+	for {
+		// Listen for an incoming connection.
+		conn, err := l.Accept()
+		if err != nil {
+			panic(err)
+		}
+
+		go handleTcpRequest(conn)
+	}
+}
+
+func handleTcpRequest(conn net.Conn) {
+	buf := make([]byte, 1024)
+	defer conn.Close()
+
+	for {
+		reqLen, err := conn.Read(buf)
+
+		if err != nil {
+
+			// client exit
+			if err == io.EOF {
+				break
+			}
+
+			fmt.Println("Error reading:", err.Error())
+			break
+		}
+
+		_, _ = conn.Write([]byte(fmt.Sprintf("Message received: %s\n", buf[:reqLen])))
 	}
 }
