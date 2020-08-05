@@ -98,9 +98,31 @@ grpcurl -insecure localhost:8005 main.HelloWorld/Greeting
 ```
 ### Test 8006
 
+Use `telnet`
+
 ```bash
 telnet localhost 8006
 
 # type something and press enter
 # Use ctrl + ] and ctrl + D to exit
+```
+
+Use `nc`
+
+```bash
+nc -v localhost 8006
+
+# type something and press enter
+# Use ctrl + c to exit
+```
+
+### Test 8007
+
+Use `nc`
+
+```bash
+nc -uv localhost 8007
+
+# type something and press enter 
+# Use ctrl + c to exit
 ```

@@ -199,11 +199,11 @@ func StartTCPServer(port int) {
 			panic(err)
 		}
 
-		go handleTcpRequest(conn)
+		go handleTcpConnection(conn)
 	}
 }
 
-func handleTcpRequest(conn net.Conn) {
+func handleTcpConnection(conn net.Conn) {
 	buf := make([]byte, 1024)
 	defer conn.Close()
 
@@ -223,4 +223,30 @@ func handleTcpRequest(conn net.Conn) {
 
 		_, _ = conn.Write([]byte(fmt.Sprintf("Message received: %s\n", buf[:reqLen])))
 	}
+}
+
+func StartUDPServer(port int) {
+	addr := ":" + strconv.Itoa(port)
+	pc, err := net.ListenPacket("udp", addr)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer pc.Close()
+
+	fmt.Printf("listening on %s, udp\n", addr)
+
+	for {
+		buf := make([]byte, 1024)
+		n, addr, err := pc.ReadFrom(buf)
+		if err != nil {
+			continue
+		}
+		go handleUdpPackageConn(pc, addr, buf[:n])
+	}
+}
+
+func handleUdpPackageConn(pc net.PacketConn, addr net.Addr, buf []byte) {
+	pc.WriteTo([]byte(fmt.Sprintf("Message received: %s\n", string(buf))), addr)
 }

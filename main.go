@@ -8,5 +8,6 @@ func main() {
 	go StartHttp2TLSServer(8003)
 	go StartGrpcServer(8004)
 	go StartGrpcWithTLSServer(8005)
-	StartTCPServer(8006)
+	go StartTCPServer(8006)
+	StartUDPServer(8007)
 }
