@@ -18,4 +18,4 @@ jobs:
           repository: kalmhq/echoserver
           username: ${{ secrets.ECHOSERVER_DOCKERHUB_USERNAME }}
           password: ${{ secrets.ECHOSERVER_DOCKERHUB_PASSWORD }}
-          tags: latest
+          tag_with_ref: true

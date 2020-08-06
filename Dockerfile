@@ -12,6 +12,7 @@ COPY default.pem .
 RUN GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o server .
 
 FROM alpine
+RUN apk update && apk add --no-cache curl
 WORKDIR /workspace
 # Collect binaries and assets
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
