@@ -19,6 +19,17 @@ import (
 	"strconv"
 )
 
+// Only trust envoy external address or tcp remote address
+func getClientIP(req *http.Request) string {
+	if req.Header.Get("X-Envoy-External-Address") != "" {
+		return req.Header.Get("X-Envoy-External-Address")
+	}
+
+	ra, _, _ := net.SplitHostPort(req.RemoteAddr)
+
+	return ra
+}
+
 func handler(w http.ResponseWriter, req *http.Request) {
 	name, err := os.Hostname()
 
@@ -30,7 +41,8 @@ func handler(w http.ResponseWriter, req *http.Request) {
 
 	_, _ = fmt.Fprintf(w, "\nRequest Info:\n")
 	_, _ = fmt.Fprintf(w, "    content-length: %d\n", req.ContentLength)
-	_, _ = fmt.Fprintf(w, "    client address: %s\n", req.RemoteAddr)
+	_, _ = fmt.Fprintf(w, "    remote address: %s\n", req.RemoteAddr)
+	_, _ = fmt.Fprintf(w, "    realIP: %s\n", getClientIP(req))
 	_, _ = fmt.Fprintf(w, "    method: %s\n", req.Method)
 	_, _ = fmt.Fprintf(w, "    path: %s\n", req.URL.Path)
 	_, _ = fmt.Fprintf(w, "    query: %s\n", req.URL.RawQuery)
