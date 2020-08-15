@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -30,6 +31,11 @@ func getClientIP(req *http.Request) string {
 	return ra
 }
 
+func printf(w io.Writer, msg string, args ...interface{}) {
+	_, _ = fmt.Fprintf(w, msg, args...)
+	fmt.Printf(msg, args...)
+}
+
 func handler(w http.ResponseWriter, req *http.Request) {
 	name, err := os.Hostname()
 
@@ -37,54 +43,59 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	_, _ = fmt.Fprintf(w, "HostName: %s\n", name)
+	printf(w, "HostName: %s\n", name)
 
-	_, _ = fmt.Fprintf(w, "\nRequest Info:\n")
-	_, _ = fmt.Fprintf(w, "    content-length: %d\n", req.ContentLength)
-	_, _ = fmt.Fprintf(w, "    remote address: %s\n", req.RemoteAddr)
-	_, _ = fmt.Fprintf(w, "    realIP: %s\n", getClientIP(req))
-	_, _ = fmt.Fprintf(w, "    method: %s\n", req.Method)
-	_, _ = fmt.Fprintf(w, "    path: %s\n", req.URL.Path)
-	_, _ = fmt.Fprintf(w, "    query: %s\n", req.URL.RawQuery)
-	_, _ = fmt.Fprintf(w, "    request_version: %s\n", req.Proto)
-	_, _ = fmt.Fprintf(w, "    uri: %s\n", req.RequestURI)
-	_, _ = fmt.Fprintf(w, "    tls: %t\n", req.TLS != nil)
+	printf(w, "\nRequest Info:\n")
+	printf(w, "    content-length: %d\n", req.ContentLength)
+	printf(w, "    remote address: %s\n", req.RemoteAddr)
+	printf(w, "    realIP: %s\n", getClientIP(req))
+	printf(w, "    method: %s\n", req.Method)
+	printf(w, "    path: %s\n", req.URL.Path)
+	printf(w, "    query: %s\n", req.URL.RawQuery)
+	printf(w, "    request_version: %s\n", req.Proto)
+	printf(w, "    uri: %s\n", req.RequestURI)
+	printf(w, "    tls: %t\n", req.TLS != nil)
 
-	_, _ = fmt.Fprintf(w, "\nHeaders:\n")
+	printf(w, "\nHeaders:\n")
 
 	for name, headers := range req.Header {
 		for _, h := range headers {
-			_, _ = fmt.Fprintf(w, "    %v: %v\n", name, h)
+			printf(w, "    %v: %v\n", name, h)
 		}
 	}
 
 	if req.Header.Get("Kalm-Sso-Userinfo") != "" {
-		_, _ = fmt.Fprintf(w, "\nKalm SSO:\n")
+		printf(w, "\nKalm SSO:\n")
 		claims, err := base64.RawStdEncoding.DecodeString(req.Header.Get("Kalm-Sso-Userinfo"))
 
 		if err != nil {
-			_, _ = fmt.Fprintf(w, "Base64 decode error: %s\n", err.Error())
+			printf(w, "Base64 decode error: %s\n", err.Error())
 		} else {
 			var out bytes.Buffer
 			prefix := "  "
 			if err := json.Indent(&out, claims, prefix, "  "); err != nil {
-				_, _ = fmt.Fprintf(w, "json indent error: %s\n", err.Error())
+				printf(w, "json indent error: %s\n", err.Error())
 			} else {
-				_, _ = fmt.Fprintf(w, "%s%s\n", prefix, string(out.Bytes()))
+				printf(w, "%s%s\n", prefix, string(out.Bytes()))
 			}
 		}
 	}
 
-	_, _ = fmt.Fprintf(w, "\nBody:\n")
-
+	printf(w, "\nBody:\n")
 	if req.Body != nil && req.ContentLength > 0 {
-		_, _ = fmt.Fprintf(w, "Length: %d\n", req.ContentLength)
+		defer req.Body.Close()
+		bs, err := ioutil.ReadAll(req.Body)
 
+		if err != nil {
+			printf(w, "Read body error: %s\n", err.Error())
+		} else {
+			printf(w, "%s", bs)
+		}
 	} else {
-		_, _ = fmt.Fprintf(w, "No Body\n")
+		printf(w, "No Body\n")
 	}
 
-	_, _ = fmt.Fprintf(w, "\n")
+	printf(w, "\n")
 }
 
 func StartHttpServer(port int) {
@@ -99,11 +110,11 @@ func StartHttpServer(port int) {
 }
 
 func StartHttp2CleartextServer(port int) {
-	h2s := &http2.Server{}
 	server := &http.Server{
 		Addr:    "0.0.0.0:" + strconv.Itoa(port),
-		Handler: h2c.NewHandler(http.HandlerFunc(handler), h2s),
+		Handler: h2c.NewHandler(http.HandlerFunc(handler), &http2.Server{}),
 	}
+
 	fmt.Printf("listening on %s, support http1.0, http1.1, non-TLS HTTP/2 (aka h2c, upgrade, prior knowledge)\n", server.Addr)
 	server.ListenAndServe()
 }
