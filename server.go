@@ -6,18 +6,19 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/peer"
-	"google.golang.org/grpc/reflection"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"strconv"
+
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/reflection"
 )
 
 // Only trust envoy external address or tcp remote address
@@ -93,6 +94,11 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		}
 	} else {
 		printf(w, "No Body\n")
+	}
+
+	printf(w, "\nEnvironment Variables:\n")
+	for _, env := range os.Environ() {
+		printf(w, "%s\n", env)
 	}
 
 	printf(w, "\n")
